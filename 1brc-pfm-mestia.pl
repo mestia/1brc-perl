@@ -3,6 +3,8 @@
 # heavily depends on I/O, faster disks - more CPUs can be utilized
 # 3.14 minutes with 8 cores and ssd drives
 # 1.52 minutes with 16 cores on the same hardware
+# a bug, when requested more cores than available the buffer
+# sometimes gets truncated in the middle of a line
 use strict;
 use warnings;
 use feature 'say';
@@ -56,8 +58,7 @@ $pm->wait_all_children;
 print "{";
 for ( sort keys %$data ) {    # print results
     my $cd = $data->{$_};
-    print $_, ";", $cd->{min} / 10, "/",
-      ( int( $cd->{sum} / $cd->{cnt} + 5 ) / 10 ), "/", $cd->{max} / 10, ", ";
+    printf "%s=%.1f/%.1f/%.1f, ", $_,$cd->{min} , $cd->{sum}/$cd->{cnt}, $cd->{max};
 }
 say "}\n";
 
@@ -72,8 +73,6 @@ sub proc_chunk {
     my $data = {};
     for my $line (@buf) {
         my ( $city, $temp ) = split( ';', $line );    # get city and temperature
-        $temp *= 10;                                  # remove decimal point
-        use integer;                                  # speeds up by 10%
         if ( $data->{$city} ) {
             my $cd = $data->{$city}
               ;    # create a local copy to speed up access for calculations
