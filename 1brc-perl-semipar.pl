@@ -2,7 +2,6 @@ use warnings;
 use strict;
 use feature qw(say state);
 use Parallel::ForkManager;
-
 #use Data::Dumper;
 #$Data::Dumper::Indent   = 1;
 #$Data::Dumper::Sortkeys = 1;
@@ -77,9 +76,6 @@ sub proc_chunk {
     my $data = {};
     for my $line ( @{ $_[0] } ) {
         my ( $city, $temp ) = split( ';', $line );    # get city and temperature
-              #$temp=~s/\.//;                           # remove decimal point
-        $temp *= 10;    # remove decimal point
-        use integer;    # speeds up by 10%
         if ( $data->{$city} ) {
             my $cd = $data->{$city}
               ;    # create a local copy to speed up access for calculations
@@ -103,7 +99,6 @@ sub proc_chunk {
 print "{";
 for ( sort keys %$data ) {                    # print results
     my $cd = $data->{$_};
-    print $_, ";", $cd->{min} / 10, "/",
-      ( int( $cd->{sum} / $cd->{cnt} + 5 ) / 10 ), "/", $cd->{max} / 10, ", ";
+    printf "%s=%.1f/%.1f/%.1f, ", $_,$cd->{min} , $cd->{sum}/$cd->{cnt}, $cd->{max};
 }
 say "}\n";
