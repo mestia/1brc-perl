@@ -10,21 +10,22 @@ use warnings;
 use feature 'say';
 use Fcntl qw(SEEK_SET SEEK_CUR SEEK_END);    # better than using 0, 1, 2
 use Parallel::ForkManager;
+
 #use Data::Dumper;
 #$Data::Dumper::Indent   = 1;
 #$Data::Dumper::Sortkeys = 1;
 
-usage{
+usage {
     die "$0 <filename> <numbers of forks>\n";
 }
 
-usage() if ! $ARGV[0];
+usage() if !$ARGV[0];
 
-my $file = shift // die "Usage: $0 filename\n";
-my $forks                = shift // 8;
-my $data                 = {};
-my $start                = 0;
-my $size                 = -s $file;
+my $file  = shift // die "Usage: $0 filename\n";
+my $forks = shift // 8;
+my $data  = {};
+my $start = 0;
+my $size  = -s $file;
 my $approx_buffer_length = $size / $forks;
 
 open my $fh, '<:mmap', $file or die "Cant open file $file, $!";
@@ -58,7 +59,8 @@ $pm->wait_all_children;
 print "{";
 for ( sort keys %$data ) {    # print results
     my $cd = $data->{$_};
-    printf "%s=%.1f/%.1f/%.1f, ", $_,$cd->{min} , $cd->{sum}/$cd->{cnt}, $cd->{max};
+    printf "%s=%.1f/%.1f/%.1f, ", $_, $cd->{min}, $cd->{sum} / $cd->{cnt},
+      $cd->{max};
 }
 say "}\n";
 
@@ -86,8 +88,12 @@ sub proc_chunk {
             $cd->{cnt}++;
         }
         else {
-            $data->{$city} = { max => $temp, min => $temp, sum => $temp,
-                cnt => 1 }                    # initialise city
+            $data->{$city} = {
+                max => $temp,
+                min => $temp,
+                sum => $temp,
+                cnt => 1
+            }    # initialise city
         }
     }
     return $data;

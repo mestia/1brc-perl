@@ -2,6 +2,7 @@ use warnings;
 use strict;
 use feature qw(say state);
 use Parallel::ForkManager;
+
 #use Data::Dumper;
 #$Data::Dumper::Indent   = 1;
 #$Data::Dumper::Sortkeys = 1;
@@ -89,16 +90,21 @@ sub proc_chunk {
             $cd->{cnt}++;
         }
         else {
-            $data->{$city} = { max => $temp, min => $temp, sum => $temp,
-                cnt => 1 }                    # initialise city
+            $data->{$city} = {
+                max => $temp,
+                min => $temp,
+                sum => $temp,
+                cnt => 1
+            }    # initialise city
         }
     }
     return $data;
 }
 
 print "{";
-for ( sort keys %$data ) {                    # print results
+for ( sort keys %$data ) {    # print results
     my $cd = $data->{$_};
-    printf "%s=%.1f/%.1f/%.1f, ", $_,$cd->{min} , $cd->{sum}/$cd->{cnt}, $cd->{max};
+    printf "%s=%.1f/%.1f/%.1f, ", $_, $cd->{min}, $cd->{sum} / $cd->{cnt},
+      $cd->{max};
 }
 say "}\n";
