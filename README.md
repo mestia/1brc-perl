@@ -21,6 +21,6 @@ Some stats:
 
 ```
 
-Other solutions:
-No third party modules, like P::FM or MCE, https://github.com/adriaandens/1brc.pl/blob/main/forkie.pl
-Another MCE solution: https://github.com/janlimpens/1brc-perl/blob/main/calculate_average_mce.pl
+Probably the cleanest solution without modules like P::FM or MCE, https://github.com/adriaandens/1brc.pl/blob/main/forkie.pl
+
+another MCE option: https://github.com/janlimpens/1brc-perl/blob/main/calculate_average_mce.pl
