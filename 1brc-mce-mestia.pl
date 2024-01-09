@@ -2,7 +2,6 @@
 use strict;
 use warnings;
 use feature 'say';
-use MCE;
 use MCE::Loop;
 
 usage {
@@ -16,18 +15,21 @@ my $proc = shift // 8;
 my $data = {};
 my $size = -s $file;
 
-my $chunk_size = int( $size / $proc );
+# If chunk_size is not defined it is set automatically to 5M by MCE
+#my $chunk_size = int( $size / $proc );
+# optimal chunk_size for the 1bio file
+#my $chunk_size = 5242880;
 
 MCE::Loop->init(
     max_workers => $proc,
-    chunk_size  => $chunk_size,
     use_slurpio => 1,
     parallel_io => 1,
+#    chunk_size  => $chunk_size,
 );
 
 my @results = mce_loop_f {
     my ( $mce, $chunk_ref, $chunk_id ) = @_;
-    MCE->gather( proc_chunk($_) );
+    MCE->gather( proc_chunk( $chunk_ref ) );
 }
 $file;
 
