@@ -31,7 +31,7 @@ my $approx_buffer_length = $size / $forks;
 open my $fh, '<:mmap', $file or die "Cant open file $file, $!";
 my $bend = $approx_buffer_length;
 
-my $pm      = Parallel::ForkManager->new( $forks + 1 );
+my $pm      = Parallel::ForkManager->new( $forks );
 my @offsets = ();
 while ( $bend < $size ) {
     last if $bend == $size;
@@ -42,11 +42,10 @@ while ( $bend < $size ) {
 
 for my $chunk (@offsets) {
     my ( $start, $end ) = @$chunk;
-
     $pm->run_on_finish(
         sub {
             my ( $pid, $exit_code, $ident, $exit_signal, $core_dump, $datast )
-              = @_;
+            = @_;
             update_global_hash($datast);
         }
     );
@@ -60,24 +59,21 @@ print "{";
 for ( sort keys %$data ) {    # print results
     my $cd = $data->{$_};
     printf "%s=%.1f/%.1f/%.1f, ", $_, $cd->{min}, $cd->{sum} / $cd->{cnt},
-      $cd->{max};
+    $cd->{max};
 }
 say "}\n";
 
 sub proc_chunk {
     my ( $fh, $start, $length ) = @_;
     seek $fh, $start, SEEK_SET;
-    my $buffer;
-    read $fh, $buffer, $length;
-    my @buf = split( '\n', $buffer );
-    $buffer = '';
-
     my $data = {};
-    for my $line (@buf) {
+    while(tell($fh) -1 < $start + $length) {
+        last if eof($fh);
+        my $line = <$fh>;
         my ( $city, $temp ) = split( ';', $line );    # get city and temperature
         if ( $data->{$city} ) {
             my $cd = $data->{$city}
-              ;    # create a local copy to speed up access for calculations
+            ;    # create a local copy to speed up access for calculations
             if ( $temp > $cd->{max} ) {    # max
                 $cd->{max} = $temp;
             }
